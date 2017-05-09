@@ -213,8 +213,15 @@ module.exports = {
 
 	addUserAccount: function(fName, lName, emailID, username, callback) {
 		var query = "INSERT INTO DeepCloud.useraccountinfo (email_id,fname,lname,user_name) VALUES (?,?,?,?)";
-		console.log("reached the function");
 		client.execute(query, [emailID, fName, lName, username], {prepare: true}, function(err, result) {
+			callback(err, result);
+		});
+	},
+
+	deleteUserAccount: function(emailID, callback) {
+		var query = "DELETE FROM deepcloud.useraccountinfo WHERE email_id =? ";
+		console.log("reached the function");
+		client.execute(query, [emailID], {prepare: true}, function(err, result) {
 			callback(err, result);
 		});
 	}

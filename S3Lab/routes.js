@@ -538,12 +538,28 @@ router.post("/testTrainedOnline",auth.authenticateToken() ,function(request,resp
 });
 
 router.post("/useraccountinfo", auth.authenticateToken(), function(request, response) {
-	console.log("hello !!" + request.body.fname+","+ request.body.lname +"," +request.body.email+","+request.body.username);
+	//console.log("hello !!" + request.body.fname+","+ request.body.lname +"," +request.body.email+","+request.body.username);
 	database.addUserAccount(request.body.fname, request.body.lname, request.body.email, request.body.username, function(err, result) {
 		if(err != null) {
 			response.status(400).send("user account not added!");
+			console.log("user account not added!")
 		}
+		console.log("user account add!");
 		response.status(200).send("user account add!");
+
+	});
+	
+});
+
+router.delete("/useraccountinfo", auth.authenticateToken(), function(request, response) {
+	//console.log("hello !!" + request.body.fname+","+ request.body.lname +"," +request.body.email+","+request.body.username);
+	database.deleteUserAccount(request.body.email, function(err, result) {
+		if(err != null) {
+			response.status(400).send("user account not deleted!");
+			console.log("user account not deleted!");
+		}
+		console.log("user account deleted!");
+		response.status(200).send("user account deleted!");
 
 	});
 	
