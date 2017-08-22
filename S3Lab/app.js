@@ -48,7 +48,7 @@ io.on('connection', function(socket) {
 	console.log('my other event');
 	
 	//------------------STUB CODE STARTS -------------------
-	stubcounter++;
+	/*stubcounter++;
 	if(stubcounter>=10){
 		socket.disconnect(0);
 	}
@@ -64,7 +64,7 @@ io.on('connection', function(socket) {
 	    var usedPercent = Math.round(40);
 		var message = '{"kpi" : '+(90+a*10)+ ', "sec_ep" : '+(11.5+a*10)+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(35) + ', "RAM": ' + usedPercent+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
 		//console.log(message);
-	    socket.emit('news',  JSON.parse(message));
+	    socket.emit('news',  JSON.parse(message));*/
 
 	    //console.log(usedPercent);
 	    //the percentage cpu usage for core 0
@@ -72,7 +72,7 @@ io.on('connection', function(socket) {
 	//---------------- STUB CODE ENDS ----------------------
 	
 	//-------UNCOMMENT the following later ---------------
-	/*cpuStat.usagePercent({
+	cpuStat.usagePercent({
 	    sampleMs: 10000,
 	  },
 	  function(err, percent, seconds) {
@@ -97,7 +97,7 @@ io.on('connection', function(socket) {
 	    //the percentage cpu usage for core 0
 	    console.log(Math.round(percent));i
 
-	});*/
+	});
 	});
 }); 
 //******* Socket.IO for Charts ENDS *********

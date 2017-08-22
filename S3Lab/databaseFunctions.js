@@ -218,12 +218,24 @@ module.exports = {
 		});
 	},
 
+	getUserAccount: function(emailID, callback) {
+		var query = "SELECT * FROM DeepCloud.useraccountinfo WHERE email_id =? ";
+		client.execute(query, [emailID], {prepare: true}, function(err, result) {
+			callback(err, result);
+		});
+	},
+
 	deleteUserAccount: function(emailID, callback) {
 		var query = "DELETE FROM deepcloud.useraccountinfo WHERE email_id =? ";
 		console.log("reached the function");
 		client.execute(query, [emailID], {prepare: true}, function(err, result) {
 			callback(err, result);
 		});
+	},
+
+	addmodelresult : function(job_id, results, callback) {
+		console.log(results[0].epoch_number+ results.length);
+
 	}
 
 	/*dashboardPullDB(function(result) {
