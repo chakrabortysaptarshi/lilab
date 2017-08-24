@@ -7,7 +7,8 @@ var client = new cassandra.Client({contactPoints: ['127.0.0.1:9042']});
 var helper = require('./helperFunctions');
 //https://www.npmjs.com/package/hashset-native
 var url = "http://localhost:8889";
-var htmlGen = require('./htmlGenerator')
+var htmlGen = require('./htmlGenerator');
+const Uuid = require('cassandra-driver').types.Uuid;
 
 
 module.exports = {
@@ -233,9 +234,20 @@ module.exports = {
 		});
 	},
 
-	addmodelresult : function(job_id, results, callback) {
-		console.log(results[0].epoch_number+ results.length);
+	addepochresult: function(job_id, results, callback) {
+		const id = Uuid.random();
+		var query = "INSERT INTO DeepCloud.epoches (epoch_id, epoche_number, job_id, time_taken, train_accuracy, train_loss, val_accuracy, val_loss) VALUES ("+id+","+parseInt(results.epoch_number,10)+","+ Uuid.fromString(job_id)+","+ 
+		parseInt(results.time,10) +","+parseFloat(results.train_acc) +","+ parseFloat(results.train_loss) + "," + parseFloat(results.val_acc) + ","+ parseFloat(results.val_loss) +")";
+		client.execute(query, {prepare: true}, function(err, result) {
+			callback(err, result);
+		});
+	},
 
+	getAllEpochresult : function(callback) {
+		var query = "SELECT * from deepcloud.epoches";
+		client.execute(query, {prepare:true}, function(err, result) {
+			callback(err, result);
+		});
 	}
 
 	/*dashboardPullDB(function(result) {

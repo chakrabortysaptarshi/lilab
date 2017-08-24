@@ -15,6 +15,7 @@ var modelDBRoutes = require('./modelDBRoutes');
 
 var cpuStat = require('cpu-stat');
 var memStat = require('mem-stat');
+var database = require('./databaseFunctions');
 //var si = require('systeminformation');
 
 process.env.NODE_ENV = 'est';
@@ -45,59 +46,52 @@ io.on('connection', function(socket) {
 	++i;
 	socket.emit('news','hello world');
 	socket.on('my other event', function(data) {
-	console.log('my other event');
-	
-	//------------------STUB CODE STARTS -------------------
-	/*stubcounter++;
-	if(stubcounter>=10){
-		socket.disconnect(0);
-	}
-	var a = parseFloat(Math.random()).toFixed(2); 
-	    accTrn.push(a);
-	    a = parseFloat(Math.random()).toFixed(2);
-	    accVal.push(a);
-	    a = parseFloat(Math.random()).toFixed(2);
-	    lossTrn.push(a);
-	    a = parseFloat(Math.random()).toFixed(2);
-	    lossVal.push(a);
+		console.log('my other event');
+		cpuStat.usagePercent({
+		    sampleMs: 10000,
+		  },
+		  function(err, percent, seconds) {
+		    if (err) {
+		      return console.log(err);
+		    }
 
-	    var usedPercent = Math.round(40);
-		var message = '{"kpi" : '+(90+a*10)+ ', "sec_ep" : '+(11.5+a*10)+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(35) + ', "RAM": ' + usedPercent+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
-		//console.log(message);
-	    socket.emit('news',  JSON.parse(message));*/
+		    database.getAllEpochresult(function(err, result) {
+				if(err != null) {
+					response.status(400).send("unable to get dashboard!");
+				}
+				var a = parseFloat(Math.random()).toFixed(2);
+				for(var i=0; i< result.rows.length; i++) {
+					accTrn.push(result.rows[i].train_accuracy);
+					accVal.push(result.rows[i].train_loss);
+					lossTrn.push(result.rows[i].val_accuracy);
+					lossVal.push(result.rows[i].val_loss);
+				}
 
-	    //console.log(usedPercent);
-	    //the percentage cpu usage for core 0
-	    //console.log(Math.round(35));i
-	//---------------- STUB CODE ENDS ----------------------
-	
-	//-------UNCOMMENT the following later ---------------
-	cpuStat.usagePercent({
-	    sampleMs: 10000,
-	  },
-	  function(err, percent, seconds) {
-	    if (err) {
-	      return console.log(err);
-	    }
-	    var a = parseFloat(Math.random()).toFixed(2); 
-	    accTrn.push(a);
-	    a = parseFloat(Math.random()).toFixed(2);
-	    accVal.push(a);
-	    a = parseFloat(Math.random()).toFixed(2);
-	    lossTrn.push(a);
-	    a = parseFloat(Math.random()).toFixed(2);
-	    lossVal.push(a);
+				var message = '{"kpi" : '+90+ ', "sec_ep" : '+result.rows[0].time_taken+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(25) + 
+				', "RAM": ' + 59+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
+				console.log(message);
+				socket.emit('news',  JSON.parse(message));
+			});
 
-	    var usedPercent = Math.round(memStat.usedPercent());
-		var message = '{"kpi" : '+(90+a*10)+ ', "sec_ep" : '+(11.5+a*10)+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(percent) + ', "RAM": ' + usedPercent+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
-		console.log(message);
-	    socket.emit('news',  JSON.parse(message));
+		    /*var a = parseFloat(Math.random()).toFixed(2); 
+		    accTrn.push(a);
+		    a = parseFloat(Math.random()).toFixed(2);
+		    accVal.push(a);
+		    a = parseFloat(Math.random()).toFixed(2);
+		    lossTrn.push(a);
+		    a = parseFloat(Math.random()).toFixed(2);
+		    lossVal.push(a);
 
-	    console.log(usedPercent);
-	    //the percentage cpu usage for core 0
-	    console.log(Math.round(percent));i
+		    var usedPercent = Math.round(memStat.usedPercent());
+			var message = '{"kpi" : '+(90+a*10)+ ', "sec_ep" : '+(11.5+a*10)+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(percent) + ', "RAM": ' + usedPercent+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
+			console.log(message);
+		    socket.emit('news',  JSON.parse(message));
 
-	});
+		    console.log(usedPercent);
+		    //the percentage cpu usage for core 0
+		    console.log(Math.round(percent));i*/
+
+		});
 	});
 }); 
 //******* Socket.IO for Charts ENDS *********

@@ -27,6 +27,7 @@ var cfg = require('./config.js');
 
 
 
+
 // Runs for all routes
 router.use(function timeLog(req, res, next) {
 	helper.logExceptOnTest('Time: ', Date.now());
@@ -384,7 +385,7 @@ router.get("/getDashboardSelective",auth.authenticateToken() , function(request,
 
 
 // 6. Kill process with specific job_id, also supply pid
-router.post("/killProcess",auth.authenticateToken() ,function(request,response) {
+router.post("/killProcess",auth.authenticateToken(), function(request,response) {
 	var form = new formidable.IncomingForm();
 	form.parse(request,function(error,fields,files) {
 		job_id = fields.job_id;
@@ -567,14 +568,54 @@ router.delete("/useraccountinfo", auth.authenticateToken(), function(request, re
 });
 
 router.post("/modelinfo", function(request, response) {
-	database.addmodelresult(request.body.job_id, request.body.results, function(request, response) {
-		if(err != null) {
-			response.status(400).send("model info not added!");
-			console.log("model info not added!")
-		}
-		console.log("model info add!");
-		response.status(200).send("model info add!");
-	});
+
+	for(var i=0; i< request.body.results.length; i++) {
+		//console.log("here now");
+		database.addepochresult(request.body.job_id, request.body.results[i], function(err, result) {
+			if(err != null) {
+				response.status(400).send("model info not added!");
+				console.log("model info not added!");
+			}
+			console.log("model info add!");
+		});
+	}
+	response.status(200).send("model info add!");
+});
+
+
+router.post("/uploadtrainingfile", function(request, response) {
+	var file_name = "";
+	var form = new formidable.IncomingForm();
+    form.uploadDir = "/home/dilip/userConfig/";
+    form.keepExtensions = true;
+    form.parse(req, function(err, fields, files) {
+        res.writeHead(200, {'content-type': 'text/plain'});
+        file_name = files.upload.name;      
+     });
+
+    form.on('file', function(field, file) {
+        fs.rename(file.path, form.uploadDir + "/" + file.name);
+    });
+
+    form.on('end', function(){
+        console.log('hi');
+        var child = exec('/home/dilip/deployscript.sh krishit '+file_name, function(error, stdout, stderr){
+	        console.log('stdout: '+stdout);
+	        console.log('stderr: '+stderr);
+	        if(error!=null){
+	            console.log('exec error: '+error);
+	        }
+	     });
+
+	     child.addListener('close', function(){
+	        console.log('child process closed');
+	        csv().fromFile(csvFilePath).on('end_parsed',(jsonArrObj)=>{
+	        	var jString = {"job_id":"12343","results":jsonArrObj}
+	            console.log(JSON.stringify(jString));
+	        });
+	    });
+    	res.end();
+    });
 });
 
 
@@ -585,9 +626,24 @@ var lossVal = [];
 
 router.get("/dashboardinfo", function(request, response) {
 
-	var cpupercent =0;
-	console.log("request");
-	cpuStat.usagePercent(function(err, percent, seconds) {
+	database.getAllEpochresult(function(err, result) {
+		if(err != null) {
+			response.status(400).send("unable to get dashboard!");
+		}
+		var a = parseFloat(Math.random()).toFixed(2);
+		for(var i=0; i< result.rows.length; i++) {
+			accTrn.push(result.rows[i].train_accuracy);
+			accVal.push(result.rows[i].train_loss);
+			lossTrn.push(result.rows[i].val_accuracy);
+			lossVal.push(result.rows[i].val_loss);
+		}
+
+		var message = '{"kpi" : '+90+ ', "sec_ep" : '+result.rows[0].time_taken+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(25) + 
+		', "RAM": ' + 59+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
+		console.log(message);
+	});
+
+	/*cpuStat.usagePercent(function(err, percent, seconds) {
     if (err) {
       return console.log(err);
     }
@@ -609,7 +665,7 @@ router.get("/dashboardinfo", function(request, response) {
 
 		response.setHeader('Content-Type', 'application/json');
     	response.send(JSON.stringify(message));
-	});
+	});*/
 	
 	 
 });
