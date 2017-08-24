@@ -584,12 +584,13 @@ router.post("/modelinfo", function(request, response) {
 
 
 router.post("/uploadtrainingfile", function(request, response) {
+	console.log("Upload test");
 	var file_name = "";
 	var form = new formidable.IncomingForm();
     form.uploadDir = "/home/dilip/userConfig/";
     form.keepExtensions = true;
-    form.parse(req, function(err, fields, files) {
-        res.writeHead(200, {'content-type': 'text/plain'});
+    form.parse(request, function(err, fields, files) {
+        response.writeHead(200, {'content-type': 'text/plain'});
         file_name = files.upload.name;      
      });
 
@@ -610,11 +611,11 @@ router.post("/uploadtrainingfile", function(request, response) {
 	     child.addListener('close', function(){
 	        console.log('child process closed');
 	        csv().fromFile(csvFilePath).on('end_parsed',(jsonArrObj)=>{
-	        	var jString = {"job_id":"12343","results":jsonArrObj}
+	        	var jString = {"job_id":"756716f7-2e54-4715-9f00-91dcbea6cf50","results":jsonArrObj}
 	            console.log(JSON.stringify(jString));
 	        });
 	    });
-    	res.end();
+    	response.end();
     });
 });
 

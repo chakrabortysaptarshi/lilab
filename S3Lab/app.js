@@ -67,8 +67,9 @@ io.on('connection', function(socket) {
 					lossVal.push(result.rows[i].val_loss);
 				}
 
-				var message = '{"kpi" : '+90+ ', "sec_ep" : '+result.rows[0].time_taken+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(25) + 
-				', "RAM": ' + 59+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
+
+				var message = '{"kpi" : '+90+ ', "sec_ep" : '+result.rows[0].time_taken+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(percent) + 
+				', "RAM": ' +  Math.round(memStat.usedPercent())+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
 				console.log(message);
 				socket.emit('news',  JSON.parse(message));
 			});
@@ -82,7 +83,6 @@ io.on('connection', function(socket) {
 		    a = parseFloat(Math.random()).toFixed(2);
 		    lossVal.push(a);
 
-		    var usedPercent = Math.round(memStat.usedPercent());
 			var message = '{"kpi" : '+(90+a*10)+ ', "sec_ep" : '+(11.5+a*10)+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(percent) + ', "RAM": ' + usedPercent+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
 			console.log(message);
 		    socket.emit('news',  JSON.parse(message));
