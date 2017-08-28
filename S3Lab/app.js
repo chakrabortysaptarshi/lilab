@@ -35,13 +35,11 @@ var server = app.listen(8889,function() {
 var io= require('socket.io')(server);
 
 //***** Socket.IO for Charts STARTS **********
-var i=0;
-var accTrn = [];
-var accVal = [];
-var lossTrn = [];
-var lossVal = [];
+
+
 var stubcounter = 0; //delete this line
 io.on('connection', function(socket) {
+	var i=0;
 	console.log('io.on connection');
 	++i;
 	socket.emit('news','hello world');
@@ -59,19 +57,25 @@ io.on('connection', function(socket) {
 				if(err != null) {
 					response.status(400).send("unable to get dashboard!");
 				}
-				var a = parseFloat(Math.random()).toFixed(2);
-				for(var i=0; i< result.rows.length; i++) {
-					accTrn.push(result.rows[i].train_accuracy);
-					accVal.push(result.rows[i].train_loss);
-					lossTrn.push(result.rows[i].val_accuracy);
-					lossVal.push(result.rows[i].val_loss);
-				}
-
-
-				var message = '{"kpi" : '+90+ ', "sec_ep" : '+result.rows[0].time_taken+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(percent) + 
-				', "RAM": ' +  Math.round(memStat.usedPercent())+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
-				console.log(message);
-				socket.emit('news',  JSON.parse(message));
+				if(result.rows.length == 0) {
+					var message = '{"chart":"none"}';
+					socket.emit('news' , JSON.parse(message));				
+				} else {
+					var accTrn = [];
+					var accVal = [];
+					var lossTrn = [];
+					var lossVal = [];
+					var a = parseFloat(Math.random()).toFixed(2);
+					for(var i=0; i< result.rows.length; i++) {
+						accTrn.push(result.rows[i].train_accuracy);
+						accVal.push(result.rows[i].train_loss);
+						lossTrn.push(result.rows[i].val_accuracy);
+						lossVal.push(result.rows[i].val_loss);
+					}
+					var message = '{"kpi" : '+90+ ', "sec_ep" : '+result.rows[0].time_taken+ ', "batch" : '+ Math.round(a*380)+ ', "sam_s" : '+ a*2000 +', "CPU" : '+ Math.round(percent) + ', "RAM": ' +  Math.round(memStat.usedPercent())+', "acTr": ['+ accTrn+'], "acVal": ['+ accVal+'], "lsTr": ['+ lossTrn+'], "lsVal": ['+ lossVal+']}'; 
+					console.log(message);
+					socket.emit('news',  JSON.parse(message));
+			}
 			});
 
 		    /*var a = parseFloat(Math.random()).toFixed(2); 

@@ -23,6 +23,9 @@ var Account = require('./models/account');
 var auth = require('./auth')();
 var jwt = require('jwt-simple');
 var cfg = require('./config.js');
+var exec = require('child_process').exec;
+const csvFilePath='/home/dilip/userConfig/training.log';
+const csv=require('csvtojson');
 
 
 
@@ -568,23 +571,20 @@ router.delete("/useraccountinfo", auth.authenticateToken(), function(request, re
 });
 
 router.post("/modelinfo", function(request, response) {
-
 	for(var i=0; i< request.body.results.length; i++) {
-		//console.log("here now");
 		database.addepochresult(request.body.job_id, request.body.results[i], function(err, result) {
 			if(err != null) {
-				response.status(400).send("model info not added!");
+				return response.send("model info not added!");
 				console.log("model info not added!");
 			}
 			console.log("model info add!");
 		});
 	}
-	response.status(200).send("model info add!");
+	return response.status(200).send("model info add!");
 });
 
 
 router.post("/uploadtrainingfile", function(request, response) {
-	console.log("Upload test");
 	var file_name = "";
 	var form = new formidable.IncomingForm();
     form.uploadDir = "/home/dilip/userConfig/";
@@ -612,7 +612,19 @@ router.post("/uploadtrainingfile", function(request, response) {
 	        console.log('child process closed');
 	        csv().fromFile(csvFilePath).on('end_parsed',(jsonArrObj)=>{
 	        	var jString = {"job_id":"756716f7-2e54-4715-9f00-91dcbea6cf50","results":jsonArrObj}
-	            console.log(JSON.stringify(jString));
+	         
+	            console.log(jString.job_id+" ");
+	            for(var i=0; i< jString.results.length; i++) {
+					database.addepochresult(jString.job_id, jString.results[i], function(err1, result) {
+						if(err1 != null) {
+							return response.send("model info not added!");
+							console.log("model info not added!");
+						}
+						console.log("model info add!");
+					});
+				}
+
+	            
 	        });
 	    });
     	response.end();
